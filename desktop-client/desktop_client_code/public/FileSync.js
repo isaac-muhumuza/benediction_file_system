@@ -287,28 +287,40 @@ fs.readFile("./public/codeFile.txt", 'utf-8', (error, content)=>{
 // sync local newly added file with server folder.
 fileMonitor.on("fileAdded", function (fileDetail) {
   console.log("File: ", fileDetail.fileName, " has been Added.");
-
-  //upload new file to server folder 
-  //and writes file details in local json to support versioning
-  fileAgent.post(baseAPI+'/upload_a_file')
-  .set({ 'Authorization': code, Accept: 'application/json' }) 
-  .field('type', 'new')
-    .field('file_name', fileDetail.fileName)
-    .attach('file', fileDetail.fullPath)
-    .then(function (response) {
-      var obj = {};
-      fs.readFile("./public/files.json", 'utf-8', (error, content)=>{
-        if(!error){
-          obj = JSON.parse(content);
-        } 
-        obj[response.body.file.file_id] = response.body.file
-        fs.writeFile("./public/files.json",JSON.stringify(obj),(error, dataWritten)=>{
-            console.log(dataWritten)
-        })
+  var prefix = fileDetail.fileName.split('_')[0];
+  var fileNameWithPrefix = fileDetail.fileName;
+  if(!(prefix === 'newfile')){
+    //upload new file to server folder 
+    //and writes file details in local json to support versioning
+    fileAgent.post(baseAPI+'/upload_a_file')
+    .set({ 'Authorization': code, Accept: 'application/json' }) 
+    .field('type', 'new')
+      .field('file_name', fileDetail.fileName)
+      .attach('file', fileDetail.fullPath)
+      .then(function (response) {
+        var obj = {};
+        fs.readFile("./public/files.json", 'utf-8', (error, content)=>{
+          if(!error){
+            obj = JSON.parse(content);
+          } 
+          obj[response.body.file.file_id] = response.body.file
+          fs.writeFile("./public/files.json",JSON.stringify(obj),(error, dataWritten)=>{
+              console.log(dataWritten)
+          })
+        });
+        console.log('body:', response.file);
+        console.log('Addition of new file: ', fileDetail.fileName, ' has been synced with server');
       });
-      console.log('body:', response.file);
-      console.log('Addition of new file: ', fileDetail.fileName, ' has been synced with server');
+  }else{
+    var fileElements = fileDetail.fileName.split('_');
+    console.log("fileElements",fileElements);
+    fileElements.splice(0,1);
+    var newfilename = fileElements.join('_');
+    console.log("newfilename",newfilename);
+    fs.rename("./benedictionFiles/" + fileDetail.fileName, "./benedictionFiles/" + newfilename, (err)=>{
+      console.log("rename", err);
     });
+  }
 
 });
 // sync with server if file has been changed.
@@ -331,6 +343,7 @@ fileMonitor.on("fileChanged", function (fileDetail, changes) {
             .attach('file', fileDetail.fullPath)
             .then(function (response, error) {
               fs.readFile("./public/files.json", 'utf-8', (error, content)=>{
+                console.log(response);
                 obj[key].version = response.body.file.version
                 fs.writeFile("./public/files.json",JSON.stringify(obj),(error, dataWritten)=>{
                     //console.log(dataWritten)
