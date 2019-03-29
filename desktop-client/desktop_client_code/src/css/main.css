@@ -133,7 +133,7 @@ p.top-container_title {
   position: absolute;
   z-index: 0;
   flex: 1;
-  width: 100%;
+  width: 90%;
   height: 100%;
 }
 .filePage {
@@ -141,7 +141,7 @@ p.top-container_title {
   flex-wrap: wrap;
   position: fixed;
   background-color: #e5e5e5;
-  width: 85%;
+  width: 100%;
   height: 80%;
   z-index: 1;
 }
@@ -163,6 +163,7 @@ p.top-container_title {
   height: 150px;
   cursor: pointer;
   border-radius: 10px;
+  margin: 5px;
 }
 .file:hover {
   background: gainsboro;
@@ -175,4 +176,16 @@ p.file_title {
   font-size: 12px;
   color: #222028;
   margin: 9px;
+}
+
+.fileName {
+  text-align: center;
+  white-space: nowrap;
+  width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/*Settings */
+.settingCont {
+  margin: 10px;
 }
